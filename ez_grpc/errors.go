@@ -1,34 +1,33 @@
 package ez_grpc
 
 import (
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	"github.com/levanthanh-ptit/go-ez/internal/ez_grpc"
 )
 
 func MakeInvalidArgument(err error) error {
-	return status.Error(codes.InvalidArgument, err.Error())
+	return ez_grpc.MakeInvalidArgument(err)
 }
 
 func MakeAlreadyExists(err error) error {
-	return status.Error(codes.AlreadyExists, err.Error())
+	return ez_grpc.MakeAlreadyExists(err)
 }
 
 func MakeDeadlineExceeded(err error) error {
-	return status.Error(codes.DeadlineExceeded, err.Error())
+	return ez_grpc.MakeDeadlineExceeded(err)
 }
 
 func MakePermissionDenied(err error) error {
-	return status.Error(codes.PermissionDenied, err.Error())
+	return ez_grpc.MakePermissionDenied(err)
 }
 
 func MakeUnauthenticated(err error) error {
-	return status.Error(codes.Unauthenticated, err.Error())
+	return ez_grpc.MakeUnauthenticated(err)
 }
 
 func MakeUnavailable(err error) error {
-	return status.Error(codes.Unavailable, err.Error())
+	return ez_grpc.MakeUnavailable(err)
 }
 
 func MakeNotFound(err error) error {
-	return status.Error(codes.NotFound, err.Error())
+	return ez_grpc.MakeNotFound(err)
 }
