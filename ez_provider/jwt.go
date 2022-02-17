@@ -7,42 +7,56 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
+// AddClaimsFunc claim adding handle type
 type AddClaimsFunc = func(target jwt.MapClaims, data interface{})
 
+// ExtractClaimsFunc claim extracting handle type
 type ExtractClaimsFunc = func(data jwt.Claims) interface{}
 
-type JWTProvider struct {
-	// Signing part
-	signingKey           string
-	accessTokenDuration  time.Duration
-	refreshTokenDuration time.Duration
-	addClaims            AddClaimsFunc
-	extractClaims        ExtractClaimsFunc
-	// Persistance part
-	// TODO: store meta with redit
+// SigningOption options for sign JWT token
+type SigningOption struct {
+	duration time.Duration
 }
 
+// Add add option method
+func (o *SigningOption) Add(options ...*SigningOption) {
+	for _, option := range options {
+		if option.duration != 0 {
+			o.duration = option.duration
+		}
+	}
+}
+
+// JWTProvider token provider
+type JWTProvider struct {
+	// Signing part
+	signingKey    string
+	addClaims     AddClaimsFunc
+	extractClaims ExtractClaimsFunc
+}
+
+// NewJWTProvider constructor
 func NewJWTProvider(
 	signingKey string,
-	accessTokenDuration time.Duration,
-	refreshTokenDuration time.Duration,
+
 	makeClaims AddClaimsFunc,
 	extractClaims ExtractClaimsFunc,
 ) *JWTProvider {
 	return &JWTProvider{
 		signingKey,
-		accessTokenDuration,
-		refreshTokenDuration,
 		makeClaims,
 		extractClaims,
 	}
 }
 
-func (p *JWTProvider) GenerateToken(data interface{}) (string, error) {
+// GenerateToken sign function
+func (p *JWTProvider) GenerateToken(data interface{}, options ...*SigningOption) (string, error) {
+	option := &SigningOption{}
+	option.Add(options...)
 	claims := jwt.MapClaims{}
 	p.addClaims(claims, data)
 	claims["authorized"] = true
-	claims["exp"] = time.Now().Add(p.accessTokenDuration).Unix()
+	claims["exp"] = time.Now().Add(option.duration).Unix()
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	token, err := at.SignedString([]byte(p.signingKey))
 	if err != nil {
@@ -51,6 +65,7 @@ func (p *JWTProvider) GenerateToken(data interface{}) (string, error) {
 	return token, nil
 }
 
+// VerifyToken verify token function
 func (p *JWTProvider) VerifyToken(token string) (interface{}, error) {
 	getKey := func(token *jwt.Token) (interface{}, error) {
 		return []byte(p.signingKey), nil
