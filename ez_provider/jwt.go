@@ -15,14 +15,14 @@ type ExtractClaimsFunc = func(data jwt.Claims) interface{}
 
 // SigningOption options for sign JWT token
 type SigningOption struct {
-	duration time.Duration
+	Duration time.Duration
 }
 
 // Add add option method
 func (o *SigningOption) Add(options ...*SigningOption) {
 	for _, option := range options {
-		if option.duration != 0 {
-			o.duration = option.duration
+		if option.Duration != 0 {
+			o.Duration = option.Duration
 		}
 	}
 }
@@ -56,7 +56,7 @@ func (p *JWTProvider) GenerateToken(data interface{}, options ...*SigningOption)
 	claims := jwt.MapClaims{}
 	p.addClaims(claims, data)
 	claims["authorized"] = true
-	claims["exp"] = time.Now().Add(option.duration).Unix()
+	claims["exp"] = time.Now().Add(option.Duration).Unix()
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	token, err := at.SignedString([]byte(p.signingKey))
 	if err != nil {
